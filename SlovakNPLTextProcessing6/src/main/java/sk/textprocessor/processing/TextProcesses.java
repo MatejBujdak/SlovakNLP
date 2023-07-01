@@ -1,7 +1,7 @@
 package sk.textprocessor.processing;
 
 import sk.textprocessor.arguments.ArgumentParser;
-
+import java.lang.StringBuilder;
 import cz.cuni.mff.ufal.morphodita.*;
 
 
@@ -17,66 +17,59 @@ public class TextProcesses {
     public String[] tokenize(String text){
 
         boolean comma = false;
-        String stacked_word = "";
-        String output = "";
+        StringBuilder stacked_word = new StringBuilder();
+        StringBuilder output = new StringBuilder();
         String[] array;
-        String punctuation = ".,<>/\\\"\'}{[]|!@#$%^&*()_-=+:;?`~";
+        String punctuation = ".,<>'/\\\"}{[]|!@#$%^&*()_-=+:;?`~";
         for(int i = 0; i < text.length();i++) {
-
-            boolean stack = false;
 
             String current_char = text.substring(i, i + 1);
 
             if (((current_char.matches("[\\d,]")) && (text.substring(i + 1, i + 2).matches("[\\d,]"))) &&
-                    !(((current_char.equals(","))) && (text.substring(i + 1, i + 2).equals(",")
-                    )) && !(current_char.substring(0, 1).equals(",") && stacked_word.isEmpty())
+                    !(((current_char.equals(","))) && ( text.charAt(i+1) == ','
+                    )) && !(  current_char.charAt(0)  == ',' && stacked_word.length() == 0)
                      ) {
-
-                stack = true;
-
-                if(comma && current_char.equals(",")){  //kontroluje, či sa nevyskytuje v stack_work 2. čiarka
-                    stack = false;
+                if(comma && current_char.equals(",")){  //checks for a second comma in stack_work
                     comma = false;
                 }else if(current_char.equals(",")){
                     comma = true;
-                    stacked_word += current_char;
+                    stacked_word.append(current_char);
                 }else{
-                    stacked_word += current_char;
+                    stacked_word.append(current_char);
                 }
 
 
             }
 
-            if (stack) {
-                continue;
-            } else if (!stacked_word.isEmpty()) {
-                output += " " + stacked_word;
-                stacked_word = "";
+            if (!(stacked_word.length() == 0)) {
+                output.append(" ").append(stacked_word);
+                stacked_word.setLength(0);
                 comma = false;
-                if (current_char.matches("\\d")) output += current_char + " ";
-                else output += " " + current_char + " ";
-            } else if (punctuation.indexOf(current_char) != -1) {
-                output += " " + current_char + " ";
+                if (current_char.matches("\\d")) output.append(current_char).append(" ");
+                else output.append(" ").append(current_char).append(" ");
+            } else if (punctuation.contains(current_char)) {
+                output.append(" ").append(current_char).append(" ");
+
             } else {
-                output += current_char;
+                output.append(current_char);
             }
 
         }
 
-        String result = "";
+        StringBuilder result = new StringBuilder();
 
-        //odstráni v kóde duplicitne medzeri
+        //removes duplicate spaces in the code
         for(int i = 0; i < output.length(); i++) {
             if(output.substring(i,i+1).equals(" ") && output.substring(i+1,i+2).equals(" ")){
                 continue;
             }
-            result += output.substring(i,i+1);
+            result.append(output.charAt(i));
         }
 
-        //rozdeli text ked je tam medzera
-        array = result.trim().split(" ");
+        //split the text if there is a space
+        array = result.toString().trim().split(" ");
 
-        //lowercasing
+        //LowerCasing
         if(ArgumentParser.isLowerCasing()){
             for (int i = 0; i < array.length; i++) {
                 array[i] = array[i].toLowerCase();
@@ -87,38 +80,34 @@ public class TextProcesses {
 
 //    extractSentences
     public String[] extractSentences(String text) {
-        ArrayList<String> sentences = new ArrayList<String>();
+        ArrayList<String> sentences = new ArrayList<>();
 
         Abbreviation skr = new Abbreviation();
         boolean dictionary = false;
 
         int sentenceLastChar = 0;
         int wordLastChar = 0;
-        String word = "";
-        String input = text;
+        String word;
 
-        sentenceLastChar = 0;
-        wordLastChar = 0;
+        for (int i = 1; i < text.length() - 3; i++) {
+            String ch = text.substring(i, i + 3);
 
-        for (int i = 1; i < input.length() - 3; i++) {
-            String ch = input.substring(i, i + 3);
-
-            if (input.charAt(i + 2) == ' ') {
-                word = input.substring(wordLastChar, i + 2).trim().toLowerCase();
+            if (text.charAt(i + 2) == ' ') {
+                word = text.substring(wordLastChar, i + 2).trim().toLowerCase();
                 wordLastChar = i + 3;
                 dictionary = skr.isAbbreviation(word);
             }
 
-            if ((ch.matches("[!?.\"\']\\s[^a-z]")) && !dictionary && !input.substring(i-1,i).matches("[ŠČŤŽÝÁÍÉÚÄÔŇĚÉŔĽA-Z]") ) {
-                sentences.add(input.substring(sentenceLastChar, i + 1).trim());
+            if ((ch.matches("[!?.\"']\\s[^a-z]")) && !dictionary && !text.substring(i-1,i).matches("[ŠČŤŽÝÁÍÉÚÄÔŇĚŔĽA-Z]") ) {
+                sentences.add(text.substring(sentenceLastChar, i + 1).trim());
                 sentenceLastChar = i + 1;
             }
         }
-        sentences.add(input.substring(sentenceLastChar, input.length()).trim());
+        sentences.add(text.substring(sentenceLastChar).trim());
         String[] sentenceArray = new String[sentences.size()];
         sentenceArray = sentences.toArray(sentenceArray);
 
-        //lowercasing
+        //LowerCasing
         if(ArgumentParser.isLowerCasing()){
             for (int i = 0; i < sentenceArray.length; i++) {
                 sentenceArray[i] = sentenceArray[i].toLowerCase();
@@ -129,15 +118,15 @@ public class TextProcesses {
     }
 
 
-    public String[] lemmatize(String text) throws Exception {
-        // Načítanie modelu
+    public String[] lemmatize(String text){
+        //Loading the model
         String modelPath = "src/taggers/slovak-morfflex-pdt-170914.tagger";
         Tagger tagger = Tagger.load(modelPath);
 
         String dictPath = "src/taggers/slovak-morfflex-170914.dict";
         Morpho morpho = Morpho.load(dictPath);
 
-        // Lematizácia každého slova v texte
+        //Lematization of each word in the text
         List<String> words = Arrays.asList(this.tokenize(text));
         String[] lemmasArray = new String[words.size()];
         int i = 0;
@@ -163,14 +152,10 @@ public class TextProcesses {
 
 
 
-    public LinkedHashMap<String, String> analyze(String text) throws Exception {
+    public LinkedHashMap<String, String> analyze(String text){
 
         String modelPath = "src/taggers/slovak-morfflex-pdt-170914.tagger";
         Tagger tagger = Tagger.load(modelPath);
-
-        String dictPath = "src/taggers/slovak-morfflex-170914.dict";
-        Morpho morpho = Morpho.load(dictPath);
-
 
         List<String> words = Arrays.asList(this.tokenize(text));
         LinkedHashMap<String, String> tags = new LinkedHashMap<>();
@@ -194,17 +179,6 @@ public class TextProcesses {
         }
 
         return tags;
-    }
-
-    public String convertProcessText(String[] strings) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < strings.length; i++) {
-            sb.append(strings[i]);
-            if (i < strings.length - 1) {
-                sb.append("\n");
-            }
-        }
-        return sb.toString();
     }
 
 

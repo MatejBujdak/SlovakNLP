@@ -1,12 +1,8 @@
-
-import cz.cuni.mff.ufal.morphodita.Morpho;
-import org.w3c.dom.Text;
 import sk.textprocessor.arguments.ArgumentParser;
 import sk.textprocessor.exceptions.*;
 
 import sk.textprocessor.input.InputReader;
 import sk.textprocessor.output.FileHandler;
-import sk.textprocessor.processing.TextProcesses;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,27 +10,26 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
-        TextProcesses TextProcessor = new TextProcesses();
         InputReader InputReader = new InputReader();
         FileHandler FileHandler = new FileHandler();
 
         try {
-            ArgumentParser ArgumentParser = new ArgumentParser(args);
+            ArgumentParser Argument = new ArgumentParser(args);
             String inputText = InputReader.readFile(ArgumentParser.getInputFile());
 
 
 //            new file controller
 
             if(!ArgumentParser.getNewFileName().equals("")){
-                FileHandler.createNewFile(ArgumentParser.getNewFileName(),ArgumentParser.processTextArgument(inputText));
+                FileHandler.createNewFile(ArgumentParser.getNewFileName(),Argument.processTextArgument(inputText));
 
             }
             if(ArgumentParser.isChangeFile()){
-                FileHandler.changeFile(ArgumentParser.processTextArgument(inputText),ArgumentParser.getInputFile());
+                FileHandler.changeFile(Argument.processTextArgument(inputText),ArgumentParser.getInputFile());
 
             }
             if(ArgumentParser.isPrintText()){
-                Object result = ArgumentParser.processTextArgument(inputText);
+                Object result = Argument.processTextArgument(inputText);
                 System.out.println(result);
                 if (result instanceof String[]) {
                     String[] output = (String[]) result;

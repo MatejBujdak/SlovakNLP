@@ -3,7 +3,6 @@ package sk.textprocessor.arguments;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import org.w3c.dom.Text;
 import sk.textprocessor.exceptions.InvalidParametersCombinationException;
 import sk.textprocessor.exceptions.InvalidTextProcessingTypeException;
 import sk.textprocessor.exceptions.UnknownParametersException;
@@ -49,14 +48,14 @@ public class ArgumentParser {
         try {
             jCommander.parse(args);
             if(checkNumberOfParameters() >  1) {
-                throw new InvalidParametersCombinationException("Chyba: Nemôžete zadať súčasne dva parametre na spracovanie textu");
+                throw new InvalidParametersCombinationException("Error: You cannot specify two text processing parameters at the same time");
             }
             if(checkNumberOfParameters() == 0){
-                throw new UnknownParametersException("Chyba: Nezadaly ste žiadny parameter na spracovanie textu");
+                throw new UnknownParametersException("Error: You have not specified any text processing parameter");
             }
             }
          catch (ParameterException e) {
-            throw new UnknownParametersException("Chyba: Zadane parametre neexistuju");
+            throw new UnknownParametersException("Error: The specified parameters do not exist");
         }
     }
 
@@ -89,7 +88,7 @@ public class ArgumentParser {
         }
 
         catch (Exception e) {
-            throw new InvalidTextProcessingTypeException("Chyba: Funkcia processTextArguments nemože spracovať dany process");
+            throw new InvalidTextProcessingTypeException("Error: The function process Text Arguments cannot handle the given process");
         }
     }
 

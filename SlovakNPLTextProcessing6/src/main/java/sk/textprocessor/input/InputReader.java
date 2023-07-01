@@ -11,16 +11,16 @@ public class InputReader {
 
     public String readFile(String fileName) throws InvalidInputFileException {
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-            String text = "";
+            StringBuilder text = new StringBuilder();
             String line;
 
             while (( line = br.readLine()) != null) {
-                text += line + "\n";
+                text.append(line).append("\n");
             }
-            return text;
+            return text.toString();
 
         } catch (IOException e) {
-            throw new InvalidInputFileException("Chyba: Nespravne zadaný súbor");
+            throw new InvalidInputFileException("Error: Incorrectly specified file");
         }
     }
 }

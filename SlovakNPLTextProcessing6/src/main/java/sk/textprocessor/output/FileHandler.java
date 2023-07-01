@@ -1,7 +1,6 @@
 package sk.textprocessor.output;
+import java.nio.file.Path;
 
-import sk.textprocessor.arguments.ArgumentParser;
-import sk.textprocessor.exceptions.InvalidInputFileException;
 import sk.textprocessor.exceptions.InvalidOutputFileException;
 
 import java.io.*;
@@ -21,13 +20,14 @@ public class FileHandler {
         String text = processFileData(outputData);
         String filename = fileName + ".txt";
         String fullPath = Paths.get(path, filename).toString();
+        Path filePath = Paths.get(fullPath);
 
         try{
-            Files.createFile(Paths.get(fullPath));
-            Files.write(Paths.get(fullPath), String.join("\n", text).getBytes());
-            System.out.println("Súbor bol úspešne vytvorený");
+            Files.createFile(filePath);
+            Files.write(filePath, String.join("\n", text).getBytes());
+            System.out.println("The file was created successfully");
         } catch(IOException e){
-            throw new InvalidOutputFileException("Chyba: súbor sa nepodarilo vytvoriť");
+            throw new InvalidOutputFileException("Error: file could not be created");
         }
     }
 
@@ -37,9 +37,9 @@ public class FileHandler {
             FileWriter fw = new FileWriter(path);
             fw.write(String.join("\n", text));
             fw.close();
-            System.out.println("Súbor bol úspene prepísaný!");
+            System.out.println("The file has been successfully overwritten!");
         } catch (IOException e) {
-            throw new InvalidOutputFileException("Chyba: subor nebol najdeny");
+            throw new InvalidOutputFileException("Error: file not found");
         }
     }
 
